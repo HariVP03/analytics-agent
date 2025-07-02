@@ -1,7 +1,8 @@
 import { generateUUID } from '@/lib/utils';
-import { DataStreamWriter, tool } from 'ai';
+import type { DataStreamWriter } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
-import { Session } from 'next-auth';
+import type { Session } from 'next-auth';
 
 interface QueryDatabaseProps {
   session: Session;
@@ -13,7 +14,7 @@ function jsonToCsv(json: any[]): string {
   const headers = Object.keys(json[0]);
   const csvRows = [headers.join(',')];
   for (const row of json) {
-    csvRows.push(headers.map(h => JSON.stringify(row[h] ?? '')).join(','));
+    csvRows.push(headers.map((h) => JSON.stringify(row[h] ?? '')).join(','));
   }
   return csvRows.join('\n');
 }
@@ -21,7 +22,7 @@ function jsonToCsv(json: any[]): string {
 export const queryDatabase = ({ session, dataStream }: QueryDatabaseProps) =>
   tool({
     description:
-      'Query an external database using a prompt. The result will be shown as a sheet (CSV table).',
+      'Whenever a user asks you to query a database, you should use this tool. Query an external database using a prompt. The result will be shown as a sheet (CSV table).',
     parameters: z.object({
       prompt: z.string().describe('The query or prompt for the database'),
     }),
@@ -49,13 +50,20 @@ export const queryDatabase = ({ session, dataStream }: QueryDatabaseProps) =>
 
       let csv = '';
       try {
-        const response = await fetch('https://your-external-api.com/query', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt }),
-        });
-        const json = await response.json();
-        csv = jsonToCsv(json);
+        // const response = await fetch('https://your-external-api.com/query', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ prompt }),
+        // });
+        // const json = await response.json();
+        // csv = jsonToCsv(json);
+        await new Promise((resolve) => setTimeout(resolve, 5_000));
+        csv = `
+        id,name,age
+        1,John,25
+        2,Jane,30
+        3,Jim,35
+        `;
       } catch (e) {
         csv = 'Error fetching or converting data.';
       }

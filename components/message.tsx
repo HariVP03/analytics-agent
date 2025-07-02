@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import { DocumentToolCall, DocumentToolResult } from './document';
-import { PencilEditIcon, SparklesIcon } from './icons';
+import { PencilEditIcon, SparklesIcon, DatabaseIcon } from './icons';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
@@ -183,6 +183,11 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'queryDatabase' ? (
+                        <DatabaseQueryIndicator
+                          args={args}
+                          isReadonly={isReadonly}
+                        />
                       ) : null}
                     </div>
                   );
@@ -209,6 +214,11 @@ const PurePreviewMessage = ({
                       ) : toolName === 'requestSuggestions' ? (
                         <DocumentToolResult
                           type="request-suggestions"
+                          result={result}
+                          isReadonly={isReadonly}
+                        />
+                      ) : toolName === 'queryDatabase' ? (
+                        <DatabaseQueryResult
                           result={result}
                           isReadonly={isReadonly}
                         />
@@ -281,5 +291,50 @@ export const ThinkingMessage = () => {
         </div>
       </div>
     </motion.div>
+  );
+};
+
+export const DatabaseQueryResult = ({
+  result,
+  isReadonly,
+}: { result: any; isReadonly: boolean }) => {
+  return (
+    <div className="cursor-pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3">
+      <div className="flex flex-row gap-3 items-start">
+        <div className="text-zinc-500 mt-1">
+          <DatabaseIcon size={16} />
+        </div>
+        <div className="text-left">{result.content}</div>
+      </div>
+    </div>
+  );
+};
+
+export const DatabaseQueryIndicator = ({
+  args,
+  isReadonly,
+}: { args: any; isReadonly: boolean }) => {
+  return (
+    <div className="cursor-pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3">
+      <div className="flex flex-row gap-3 items-start">
+        <div className="text-zinc-500 mt-1">
+          <DatabaseIcon />
+        </div>
+        <div className="text-left">Querying database</div>
+      </div>
+      <div className="animate-spin mt-1">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="#888"
+            strokeWidth="4"
+            strokeDasharray="60"
+            strokeDashoffset="20"
+          />
+        </svg>
+      </div>
+    </div>
   );
 };

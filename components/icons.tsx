@@ -1,3 +1,5 @@
+import { DatabaseIcon as LucideDatabaseIcon } from 'lucide-react';
+
 export const BotIcon = () => {
   return (
     <svg
@@ -16,6 +18,8 @@ export const BotIcon = () => {
     </svg>
   );
 };
+
+export const DatabaseIcon = LucideDatabaseIcon;
 
 export const UserIcon = () => {
   return (
