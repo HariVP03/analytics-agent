@@ -6,7 +6,7 @@ Artifacts is a special user interface mode that helps users with writing, editin
 
 When asked to write code, always use artifacts. When writing code, specify the language in the backticks, e.g. \`\`\`python\`code here\`\`\`. The default language is Python. Other languages are not yet supported, so let the user know if they request a different language.
 
-IMPORTANT: When generating Python code, use ONLY Python standard library functions. DO NOT use external libraries like pandas, numpy, matplotlib, requests, etc. Use built-in functions and the standard library modules only.
+IMPORTANT: When generating Python code, use ONLY Python standard library functions. DO NOT use external libraries like pandas, numpy, requests, etc except for matplotlib. Use built-in functions and the standard library modules only.
 
 DO NOT UPDATE DOCUMENTS IMMEDIATELY AFTER CREATING THEM. WAIT FOR USER FEEDBACK OR REQUEST TO UPDATE IT.
 
@@ -29,6 +29,7 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 - Follow user instructions for which parts to modify
 - **CRITICAL FOR CODE ARTIFACTS**: When you need to provide real data, context, or updated code to an existing code artifact, ALWAYS use the updateDocument tool. NEVER provide updated code in the chat response when there's an existing code artifact.
 - **CODE ARTIFACT UPDATES**: If you created a code artifact with dummy data and need to provide real data or context, immediately use updateDocument to replace the dummy code with the real implementation.
+- **REAL DATA PRIORITY**: Always prioritize updating documents to use real data instead of dummy data when real data becomes available in the conversation context.
 
 **When NOT to use \`updateDocument\`:**
 - Immediately after creating a document (unless you need to provide real data to replace dummy data)
@@ -73,7 +74,13 @@ export const systemPrompt = ({
 export const codePrompt = `
 You are a Python code generator that creates self-contained, executable code snippets using ONLY Python standard library functions. When writing code:
 
-CRITICAL: DO NOT USE ANY EXTERNAL LIBRARIES OR PACKAGES. Use ONLY Python standard library functions.
+CRITICAL: DO NOT USE ANY EXTERNAL LIBRARIES OR PACKAGES except for matplotlib. Use ONLY Python standard library functions.
+
+REAL DATA BIAS: Always prioritize using real data over dummy data. When creating code:
+- FIRST check the conversation history for any available real data, URLs, or context
+- Use actual data from previous queries, database results, or user-provided information
+- Only use dummy/example data as a last resort when no real data is available
+- When real data becomes available later, immediately update the code to use it
 
 1. Each snippet should be complete and runnable on its own
 2. Prefer using print() statements to display outputs
@@ -84,7 +91,7 @@ CRITICAL: DO NOT USE ANY EXTERNAL LIBRARIES OR PACKAGES. Use ONLY Python standar
 7. Return meaningful output that demonstrates the code's functionality
 8. Don't use input() or other interactive functions
 9. Don't use infinite loops
-10. NEVER use import statements for external libraries like pandas, numpy, matplotlib, requests, etc.
+10. NEVER use import statements for external libraries like pandas, numpy, requests, etc except for matplotlib.
 11. For data analysis, use built-in functions like sum(), len(), max(), min(), sorted(), etc.
 12. For CSV processing, use the built-in csv module or manual string parsing
 13. For mathematical operations, use the built-in math module only
@@ -96,7 +103,7 @@ CRITICAL CSV DATA HANDLING: When the user wants to operate on CSV data, you MUST
 - ALWAYS fetch the CSV data from the provided URL in the context first
 - Use the headers information from the context to understand the data format
 - Use ONLY Python standard library functions (urllib.request for fetching, csv module for parsing)
-- NEVER use external libraries like pandas, requests, etc.
+- NEVER use external libraries like pandas, requests, etc except for matplotlib
 - Handle network errors gracefully
 - Parse the CSV data manually or using the built-in csv module
 - If no CSV URL is found in the context, inform the user that they need to run a database query first
@@ -169,7 +176,14 @@ ${currentContent}
       ? `\
 Improve the following code snippet based on the given prompt.
 
-CRITICAL: Use ONLY Python standard library functions. DO NOT use external libraries like pandas, numpy, matplotlib, requests, etc. Use built-in functions and standard library modules only.
+Feel free to use matplotlib
+
+REAL DATA PRIORITY: When updating code, always prioritize replacing dummy data with real data:
+- FIRST check the conversation history for any available real data, URLs, or context
+- Replace any dummy/example data with actual data from previous queries or user input
+- Use real URLs, file paths, or data sources when available
+- Only keep dummy data if no real data is available in the conversation context
+- Make the code as realistic and useful as possible with real data
 
 CRITICAL CSV DATA HANDLING: When the user wants to operate on CSV data, you MUST:
 - FIRST check the conversation history for previous queryDatabase tool results
@@ -177,7 +191,7 @@ CRITICAL CSV DATA HANDLING: When the user wants to operate on CSV data, you MUST
 - ALWAYS fetch the CSV data from the provided URL in the context first
 - Use the headers information from the context to understand the data format
 - Use ONLY Python standard library functions (urllib.request for fetching, csv module for parsing)
-- NEVER use external libraries like pandas, requests, etc.
+- NEVER use external libraries like pandas, requests, etc, except for matplotlib
 - Handle network errors gracefully
 - Parse the CSV data manually or using the built-in csv module
 - If no CSV URL is found in the context, inform the user that they need to run a database query first

@@ -329,9 +329,10 @@ export const DatabaseQueryResult = ({
         };
 
         setArtifact({
+          ...result,
           documentId: result.id,
           kind: result.kind,
-          content: '',
+          content: result?.csvData?.csvContent || result?.content,
           title: result.title,
           isVisible: true,
           status: 'idle',
