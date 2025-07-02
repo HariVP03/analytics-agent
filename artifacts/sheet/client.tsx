@@ -17,12 +17,13 @@ export const sheetArtifact = new Artifact<'sheet', Metadata>({
   description: 'Useful for working with spreadsheets',
   initialize: async () => {},
   onStreamPart: ({ setArtifact, streamPart }) => {
-    if (streamPart.type === 'sheet-delta') {
+    if (streamPart.type === 'sheet-delta' && streamPart.content) {
       setArtifact((draftArtifact) => ({
         ...draftArtifact,
         content: streamPart.content as string,
         isVisible: true,
         status: 'streaming',
+        kind: 'sheet',
       }));
     }
   },
@@ -107,7 +108,7 @@ export const sheetArtifact = new Artifact<'sheet', Metadata>({
         appendMessage({
           role: 'user',
           content:
-            'Can you please analyze and visualize the data by creating a new code artifact in python?',
+            'Can you please analyze and visualize the data by creating a new code artifact in python using only standard library functions?',
         });
       },
     },

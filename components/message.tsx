@@ -20,6 +20,7 @@ import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { useArtifact } from '@/hooks/use-artifact';
+import { toast } from 'sonner';
 
 const PurePreviewMessage = ({
   chatId,
@@ -304,15 +305,47 @@ export const DatabaseQueryResult = ({
   result,
   isReadonly,
 }: { result: any; isReadonly: boolean }) => {
+  const { setArtifact } = useArtifact();
+
   return (
-    <div className="cursor-pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3">
-      <div className="flex flex-row gap-3 items-start">
-        <div className="text-zinc-500 mt-1">
-          <DatabaseIcon size={16} />
-        </div>
-        <div className="text-left">{result.content}</div>
+    <button
+      type="button"
+      className="bg-background cursor-pointer border py-2 px-3 rounded-xl w-fit flex flex-row gap-3 items-start"
+      onClick={(event) => {
+        if (isReadonly) {
+          toast.error(
+            'Viewing files in shared chats is currently not supported.',
+          );
+          return;
+        }
+
+        const rect = event.currentTarget.getBoundingClientRect();
+
+        const boundingBox = {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        };
+
+        setArtifact({
+          documentId: result.id,
+          kind: result.kind,
+          content: '',
+          title: result.title,
+          isVisible: true,
+          status: 'idle',
+          boundingBox,
+        });
+      }}
+    >
+      <div className="text-muted-foreground mt-1">
+        <DatabaseIcon size={16} />
       </div>
-    </div>
+      <div className="text-left">
+        Database query completed - click to view results
+      </div>
+    </button>
   );
 };
 
@@ -322,7 +355,7 @@ export const DatabaseQueryIndicator = ({
 }: { args: any; isReadonly: boolean }) => {
   return (
     <div className="w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3">
-      <div className="flex flex-row gap-3 items-start">
+      <div className="flex flex-row gap-3 items-center">
         <div className="text-zinc-500 mt-1">
           <DatabaseIcon />
         </div>

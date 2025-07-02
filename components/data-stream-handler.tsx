@@ -2,8 +2,8 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef } from 'react';
-import { artifactDefinitions, ArtifactKind } from './artifact';
-import { Suggestion } from '@/lib/db/schema';
+import { artifactDefinitions, type ArtifactKind } from './artifact';
+import type { Suggestion } from '@/lib/db/schema';
 import { initialArtifactData, useArtifact } from '@/hooks/use-artifact';
 
 export type DataStreamDelta = {
@@ -33,11 +33,17 @@ export function DataStreamHandler({ id }: { id: string }) {
     lastProcessedIndex.current = dataStream.length - 1;
 
     (newDeltas as DataStreamDelta[]).forEach((delta: DataStreamDelta) => {
+      let currentArtifactKind = artifact.kind;
+
+      if (delta.type === 'kind') {
+        currentArtifactKind = delta.content as ArtifactKind;
+      }
+
       const artifactDefinition = artifactDefinitions.find(
-        (artifactDefinition) => artifactDefinition.kind === artifact.kind,
+        (artifactDefinition) => artifactDefinition.kind === currentArtifactKind,
       );
 
-      if (artifactDefinition?.onStreamPart) {
+      if (artifactDefinition?.onStreamPart && delta.type !== 'finish') {
         artifactDefinition.onStreamPart({
           streamPart: delta,
           setArtifact,

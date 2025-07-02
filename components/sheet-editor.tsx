@@ -18,6 +18,8 @@ type SheetEditorProps = {
 
 const MIN_ROWS = 50;
 const MIN_COLS = 26;
+const MAX_ROWS = 1000;
+const MAX_COLS = 50;
 
 const PureSpreadsheetEditor = ({
   content,
@@ -26,24 +28,46 @@ const PureSpreadsheetEditor = ({
   isCurrentVersion,
 }: SheetEditorProps) => {
   const { resolvedTheme } = useTheme();
+  const [isTruncated, setIsTruncated] = useState(false);
 
   const parseData = useMemo(() => {
     if (!content) return Array(MIN_ROWS).fill(Array(MIN_COLS).fill(''));
-    const result = parse<string[]>(content, { skipEmptyLines: true });
 
-    const paddedData = result.data.map((row) => {
-      const paddedRow = [...row];
-      while (paddedRow.length < MIN_COLS) {
-        paddedRow.push('');
+    try {
+      const result = parse<string[]>(content, { skipEmptyLines: true });
+
+      if (!result.data || result.data.length === 0) {
+        return Array(MIN_ROWS).fill(Array(MIN_COLS).fill(''));
       }
-      return paddedRow;
-    });
 
-    while (paddedData.length < MIN_ROWS) {
-      paddedData.push(Array(MIN_COLS).fill(''));
+      const limitedData = result.data.slice(0, MAX_ROWS);
+      const isDataTruncated = result.data.length > MAX_ROWS;
+
+      const paddedData = limitedData.map((row) => {
+        const paddedRow = [...row];
+        while (paddedRow.length < MIN_COLS) {
+          paddedRow.push('');
+        }
+        if (paddedRow.length > MAX_COLS) {
+          paddedRow.splice(MAX_COLS);
+        }
+        return paddedRow;
+      });
+
+      setIsTruncated(
+        isDataTruncated ||
+          (limitedData.length > 0 && limitedData[0].length > MAX_COLS),
+      );
+
+      while (paddedData.length < MIN_ROWS) {
+        paddedData.push(Array(MIN_COLS).fill(''));
+      }
+
+      return paddedData;
+    } catch (error) {
+      console.error('Error parsing CSV:', error);
+      return Array(MIN_ROWS).fill(Array(MIN_COLS).fill(''));
     }
-
-    return paddedData;
   }, [content]);
 
   const columns = useMemo(() => {
@@ -57,7 +81,13 @@ const PureSpreadsheetEditor = ({
       headerCellClass: 'border-t border-r dark:bg-zinc-900 dark:text-zinc-50',
     };
 
-    const dataColumns = Array.from({ length: MIN_COLS }, (_, i) => ({
+    const maxCols = Math.max(
+      MIN_COLS,
+      parseData.length > 0 ? parseData[0].length : MIN_COLS,
+    );
+    const actualCols = Math.min(maxCols, MAX_COLS);
+
+    const dataColumns = Array.from({ length: actualCols }, (_, i) => ({
       key: i.toString(),
       name: String.fromCharCode(65 + i),
       renderEditCell: textEditor,
@@ -71,7 +101,7 @@ const PureSpreadsheetEditor = ({
     }));
 
     return [rowNumberColumn, ...dataColumns];
-  }, []);
+  }, [parseData]);
 
   const initialRows = useMemo(() => {
     return parseData.map((row, rowIndex) => {
@@ -110,23 +140,31 @@ const PureSpreadsheetEditor = ({
   };
 
   return (
-    <DataGrid
-      className={resolvedTheme === 'dark' ? 'rdg-dark' : 'rdg-light'}
-      columns={columns}
-      rows={localRows}
-      enableVirtualization
-      onRowsChange={handleRowsChange}
-      onCellClick={(args) => {
-        if (args.column.key !== 'rowNumber') {
-          args.selectCell(true);
-        }
-      }}
-      style={{ height: '100%' }}
-      defaultColumnOptions={{
-        resizable: true,
-        sortable: true,
-      }}
-    />
+    <div className="flex flex-col h-full">
+      {isTruncated && (
+        <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-4 py-2 text-sm border-b">
+          Data has been truncated to improve performance. Showing first{' '}
+          {MAX_ROWS} rows and {MAX_COLS} columns.
+        </div>
+      )}
+      <DataGrid
+        className={resolvedTheme === 'dark' ? 'rdg-dark' : 'rdg-light'}
+        columns={columns}
+        rows={localRows}
+        enableVirtualization
+        onRowsChange={handleRowsChange}
+        onCellClick={(args) => {
+          if (args.column.key !== 'rowNumber') {
+            args.selectCell(true);
+          }
+        }}
+        style={{ height: '100%' }}
+        defaultColumnOptions={{
+          resizable: true,
+          sortable: true,
+        }}
+      />
+    </div>
   );
 };
 

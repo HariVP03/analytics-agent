@@ -52,7 +52,7 @@ export const myProvider = isTestEnvironment
           model: vertex('gemini-2.5-pro', {}),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
-        'title-model': openAI('gpt-4o-mini'),
+        'title-model': vertex('gemini-2.5-flash', {}),
         'artifact-model': vertex('gemini-2.5-flash', {}),
       },
       imageModels: {
