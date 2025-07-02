@@ -9,7 +9,7 @@ interface QueryDatabaseProps {
   dataStream: DataStreamWriter;
 }
 
-function jsonToCsv(json: any[]): string {
+function jsonToCsv(json: Record<string, string>[]): string {
   if (!Array.isArray(json) || json.length === 0) return '';
   const headers = Object.keys(json[0]);
   const csvRows = [headers.join(',')];
@@ -50,20 +50,19 @@ export const queryDatabase = ({ session, dataStream }: QueryDatabaseProps) =>
 
       let csv = '';
       try {
-        // const response = await fetch('https://your-external-api.com/query', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ prompt }),
-        // });
-        // const json = await response.json();
-        // csv = jsonToCsv(json);
-        await new Promise((resolve) => setTimeout(resolve, 5_000));
-        csv = `
-        id,name,age
-        1,John,25
-        2,Jane,30
-        3,Jim,35
-        `;
+        const response = await fetch('http://localhost:5050/health/chatbot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            brandid: 'w-for-women',
+          },
+          body: JSON.stringify({ prompt }),
+        });
+        const json = (await response.json()) as {
+          data: Record<string, string>[];
+        };
+
+        csv = jsonToCsv(json.data);
       } catch (e) {
         csv = 'Error fetching or converting data.';
       }
