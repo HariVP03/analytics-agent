@@ -3,7 +3,7 @@ import Image from 'next/image';
 import type { UIMessage } from 'ai';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
-import { memo, useState } from 'react';
+import { memo, useState, useCallback, type MouseEvent } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import { DocumentToolCall, DocumentToolResult } from './document';
 import { PencilEditIcon, SparklesIcon, DatabaseIcon } from './icons';
@@ -19,6 +19,7 @@ import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
+import { useArtifact } from '@/hooks/use-artifact';
 
 const PurePreviewMessage = ({
   chatId,
@@ -320,7 +321,7 @@ export const DatabaseQueryIndicator = ({
   isReadonly,
 }: { args: any; isReadonly: boolean }) => {
   return (
-    <div className="cursor-pointer w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3">
+    <div className="w-fit border py-2 px-3 rounded-xl flex flex-row items-start justify-between gap-3">
       <div className="flex flex-row gap-3 items-start">
         <div className="text-zinc-500 mt-1">
           <DatabaseIcon />
