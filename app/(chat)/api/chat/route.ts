@@ -36,6 +36,7 @@ import { after } from 'next/server';
 import type { Chat } from '@/lib/db/schema';
 import { differenceInSeconds } from 'date-fns';
 import { ChatSDKError } from '@/lib/errors';
+import { queryDatabase } from '@/lib/ai/tools/query-database';
 
 export const maxDuration = 60;
 
@@ -159,6 +160,7 @@ export async function POST(request: Request) {
                   'createDocument',
                   'updateDocument',
                   'requestSuggestions',
+                  'queryDatabase',
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -166,6 +168,7 @@ export async function POST(request: Request) {
             getWeather,
             createDocument: createDocument({ session, dataStream }),
             updateDocument: updateDocument({ session, dataStream }),
+            queryDatabase: queryDatabase({ session, dataStream }),
             requestSuggestions: requestSuggestions({
               session,
               dataStream,
