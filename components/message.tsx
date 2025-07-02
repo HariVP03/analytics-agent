@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import type { UIMessage } from 'ai';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -62,7 +62,12 @@ const PurePreviewMessage = ({
           {message.role === 'assistant' && (
             <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
               <div className="translate-y-px">
-                <SparklesIcon size={14} />
+                <img
+                  src="https://api.dicebear.com/9.x/micah/svg?seed=Felix"
+                  alt="Analytics Agent"
+                  width={32}
+                  height={32}
+                />
               </div>
             </div>
           )}
