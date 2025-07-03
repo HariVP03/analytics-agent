@@ -66,14 +66,17 @@ export const queryDatabase = ({ session, dataStream }: QueryDatabaseProps) =>
       let headers = '';
 
       try {
-        const response = await fetch('http://localhost:5050/health/chatbot', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            brandid: 'w-for-women',
+        const response = await fetch(
+          `${process.env.BACKEND_BASE_URL}${process.env.QUERY_DATABASE_API_ROUTE}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              brandid: 'w-for-women',
+            },
+            body: JSON.stringify({ prompt }),
           },
-          body: JSON.stringify({ prompt }),
-        });
+        );
 
         const json = (await response.json()) as {
           data: Record<string, string>[];
