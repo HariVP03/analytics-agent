@@ -20,7 +20,6 @@ export async function GET(request: Request) {
   });
 
   if (token && token.email === brandId) {
-    console.log(token.email, brandId, ' 123');
     const decodedRedirectUrl = decodeURIComponent(redirectUrl);
     return NextResponse.redirect(decodedRedirectUrl);
   }

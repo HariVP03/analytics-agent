@@ -31,7 +31,10 @@ export async function middleware(request: NextRequest) {
     searchParams.append('redirectUrl', redirectUrl);
 
     return NextResponse.redirect(
-      new URL(`/api/auth/guest?${searchParams.toString()}`, request.url),
+      new URL(
+        `/api/auth/refresh-token?${searchParams.toString()}`,
+        request.url,
+      ),
     );
   }
 
