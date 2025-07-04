@@ -65,6 +65,13 @@ function getStreamContext() {
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
 
+  const brandId = request.headers.get('brandid');
+
+  if (!brandId) {
+    console.error('Brand ID is required');
+    return new ChatSDKError('bad_request:api').toResponse();
+  }
+
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
@@ -168,7 +175,11 @@ export async function POST(request: Request) {
             getWeather,
             createDocument: createDocument({ session, dataStream }),
             updateDocument: updateDocument({ session, dataStream }),
-            queryDatabase: queryDatabase({ session, dataStream }),
+            queryDatabase: queryDatabase({
+              session,
+              dataStream,
+              brandId: brandId ?? '',
+            }),
             requestSuggestions: requestSuggestions({
               session,
               dataStream,

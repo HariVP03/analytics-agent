@@ -39,6 +39,7 @@ export function Chat({
   autoResume: boolean;
 }) {
   const { mutate } = useSWRConfig();
+  const searchParams = useSearchParams();
 
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -64,6 +65,9 @@ export function Chat({
     sendExtraMessageFields: true,
     generateId: generateUUID,
     fetch: fetchWithErrorHandlers,
+    headers: {
+      brandid: searchParams.get('shop') ?? searchParams.get('brandid') ?? '',
+    },
     experimental_prepareRequestBody: (body) => ({
       id,
       message: body.messages.at(-1),
@@ -83,7 +87,6 @@ export function Chat({
     },
   });
 
-  const searchParams = useSearchParams();
   const query = searchParams.get('query');
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);

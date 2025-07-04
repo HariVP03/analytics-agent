@@ -8,6 +8,7 @@ import { put } from '@vercel/blob';
 interface QueryDatabaseProps {
   session: Session;
   dataStream: DataStreamWriter;
+  brandId: string;
 }
 
 function jsonToCsv(json: Record<string, string>[]): string {
@@ -32,7 +33,11 @@ function getCsvHeaders(csv: string): string {
   return lines[0] || '';
 }
 
-export const queryDatabase = ({ session, dataStream }: QueryDatabaseProps) =>
+export const queryDatabase = ({
+  session,
+  dataStream,
+  brandId,
+}: QueryDatabaseProps) =>
   tool({
     description:
       'Whenever a user asks you to query a database, you should use this tool. Query an external database using a prompt. The result will be shown as a sheet (CSV table).',
@@ -72,7 +77,7 @@ export const queryDatabase = ({ session, dataStream }: QueryDatabaseProps) =>
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              brandid: 'w-for-women',
+              brandid: brandId,
             },
             body: JSON.stringify({ prompt }),
           },
