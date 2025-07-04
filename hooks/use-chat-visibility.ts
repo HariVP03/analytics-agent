@@ -18,7 +18,10 @@ export function useChatVisibility({
   initialVisibilityType: VisibilityType;
 }) {
   const { mutate, cache } = useSWRConfig();
-  const history: ChatHistory = cache.get('/api/history')?.data;
+  const searchParams = new URLSearchParams(window.location.search);
+  const history: ChatHistory = cache.get(
+    `/api/history?${searchParams.toString()}`,
+  )?.data;
 
   const { data: localVisibility, mutate: setLocalVisibility } = useSWR(
     `${chatId}-visibility`,

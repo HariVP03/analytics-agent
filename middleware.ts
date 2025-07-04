@@ -3,7 +3,7 @@ import { getToken } from 'next-auth/jwt';
 import { guestRegex, isDevelopmentEnvironment } from './lib/constants';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
 
   /*
    * Playwright starts the dev server and requires a 200 status to
@@ -23,11 +23,15 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  if (!token) {
+  const brandId = searchParams.get('shop') || searchParams.get('brandid') || '';
+
+  if (!token || token?.email !== brandId) {
     const redirectUrl = encodeURIComponent(request.url);
 
+    searchParams.append('redirectUrl', redirectUrl);
+
     return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url),
+      new URL(`/api/auth/guest?${searchParams.toString()}`, request.url),
     );
   }
 
@@ -42,17 +46,17 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // '/',
-    // '/chat/:id',
-    // '/api/:path*',
-    // '/login',
-    // '/register',
-    // /*
-    //  * Match all request paths except for the ones starting with:
-    //  * - _next/static (static files)
-    //  * - _next/image (image optimization files)
-    //  * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-    //  */
-    // '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    '/',
+    '/chat/:id',
+    '/api/:path*',
+    '/login',
+    '/register',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
   ],
 };

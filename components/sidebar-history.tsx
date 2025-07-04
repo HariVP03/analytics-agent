@@ -84,13 +84,16 @@ export function getChatHistoryPaginationKey(
     return null;
   }
 
-  if (pageIndex === 0) return `/api/history?limit=${PAGE_SIZE}`;
+  const searchParams = new URLSearchParams(window.location.search);
+  searchParams.set('limit', PAGE_SIZE.toString());
+
+  if (pageIndex === 0) return `/api/history?${searchParams.toString()}`;
 
   const firstChatFromPage = previousPageData.chats.at(-1);
 
   if (!firstChatFromPage) return null;
 
-  return `/api/history?ending_before=${firstChatFromPage.id}&limit=${PAGE_SIZE}`;
+  return `/api/history?ending_before=${firstChatFromPage.id}&${searchParams.toString()}`;
 }
 
 export function SidebarHistory({ user }: { user: User | undefined }) {

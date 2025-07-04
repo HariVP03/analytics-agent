@@ -76,6 +76,7 @@ export const {
       if (user) {
         token.id = user.id as string;
         token.type = user.type;
+        token.email = user.email;
       }
 
       return token;

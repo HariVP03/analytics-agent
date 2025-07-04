@@ -61,19 +61,7 @@ export const register = async (
       password: formData.get('password'),
     });
 
-    const [user] = await getUser(validatedData.email);
-
-    if (user) {
-      return { status: 'user_exists' } as RegisterActionState;
-    }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn('credentials', {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
-    });
-
-    return { status: 'success' };
+    return await registerIfNotExists(validatedData);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: 'invalid_data' };
@@ -82,3 +70,25 @@ export const register = async (
     return { status: 'failed' };
   }
 };
+
+export async function registerIfNotExists({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}): Promise<RegisterActionState> {
+  const [user] = await getUser(email);
+
+  if (user) {
+    return { status: 'user_exists' };
+  }
+
+  await createUser(email, password);
+
+  return signIn('credentials', {
+    email,
+    password,
+    redirect: false,
+  });
+}
